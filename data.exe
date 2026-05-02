@@ -1,0 +1,60 @@
+MZ_FAKE_SAMPLE_03
+This program cannot be run in DOS mode
+
+--- DLL / API STRINGS ---
+kernel32.dll
+advapi32.dll
+wininet.dll
+ws2_32.dll
+CreateFileW
+WriteFile
+RegOpenKeyExA
+RegSetValueExA
+InternetOpenUrlA
+URLDownloadToFileA
+WSAStartup
+connect
+send
+recv
+Sleep
+
+--- COMMAND STRINGS ---
+cmd.exe /c tasklist
+cmd.exe /c systeminfo
+powershell.exe -ExecutionPolicy Bypass -NoProfile
+schtasks /create /tn FakeUpdater /sc minute /mo 30
+
+--- NETWORK INDICATORS ---
+http://fake-c2.local/checkin
+https://example-bad.test/update
+api.fake-control.test
+192.168.56.101
+User-Agent: TestAgent/3.0
+POST /gate.php HTTP/1.1
+
+--- REGISTRY STRINGS ---
+HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run
+Software\\FakeUpdater\\Config
+RunOnce
+FakeUpdateService
+
+--- UNICODE / UTF-16LE STYLE ---
+c\0m\0d\0.\0e\0x\0e\0
+p\0o\0w\0e\0r\0s\0h\0e\0l\0l\0.\0e\0x\0e\0
+h\0t\0t\0p\0:\0/\0/\0f\0a\0k\0e\0-\0c\02\0.\0l\0o\0c\0a\0l\0
+U\0s\0e\0r\0-\0A\0g\0e\0n\0t\0:\0 \0T\0e\0s\0t\0A\0g\0e\0n\0t\0
+
+--- NOISE ---
+AAAAABBBBBCCCCCDDDD
+@@@###$$$%%%^^^&&&
+x9f8a7b6c5d4e3
+base64:dGVzdF9wYXlsb2FkX29ubHk=
+xor_key:0x41
+
+--- FAKE PACKER ---
+UPX0
+UPX1
+.packed
+.fakecrypt
+
+--- END ---

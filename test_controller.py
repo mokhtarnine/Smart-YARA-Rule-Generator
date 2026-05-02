@@ -2,7 +2,7 @@ from core.controller import Controller
 
 controller = Controller()
 
-file_path = "m1.exe"
+file_path = "data.exe"
 
 try:
     result = controller.analyze_file(file_path)
