@@ -1,0 +1,30 @@
+from core.controller import Controller
+
+controller = Controller()
+
+file_path = "m1.exe"
+
+try:
+    result = controller.analyze_file(file_path)
+
+    print("*** CONTROLLER TEST ****")
+    print("Success:", result["success"])
+
+    print("\n*** FILE INFO ****")
+    print(result["file_info"])
+
+    print("\n *** TOTAL STRINGS ****")
+    print(len(result["strings"]))
+
+    print("\n **** TOP SCORED STRINGS ****")
+    for s, score in result["scored_strings"][:10]:
+        print(f"[{score}] {s}")
+
+    print("\n*** GENERATED RULE ***")
+    print(result["rule"])
+
+    print("\n*** SCAN RESULT ***")
+    print(result["scan_result"])
+
+except Exception as e:
+    print("Error:", e)
