@@ -4,6 +4,11 @@ from core.filter_engine import FilterEngine
 from core.rule_generator import RuleGenerator
 from core.yara_scanner import YaraScanner
 
+from models.rule import Rule
+from models.scan_result import ScanResult
+from models.analysis import AnalysisResult
+
+
 class Controller:
     """
     Main coordinator of the application.
@@ -16,7 +21,7 @@ class Controller:
         self.rule_generator = RuleGenerator()
         self.yara_scanner = YaraScanner()
 
-    def analyze_file(self, file_path: str) -> dict:
+    def analyze_file(self, file_path: str) :
         # load file
         data = self.file_loader.load_file(file_path)
 
@@ -40,14 +45,29 @@ class Controller:
             }
         # scan file
         scan_result = self.yara_scanner.scan(file_path,rule)
+        # used model rule for implement dipslay content rule
+        rule_model = Rule(
+            name = self.rule_generator.rule_name,
+            content= rule,
+            author = self.rule_generator.author,
+            description= "Generated from extracted suspicious strings"
+        )
+        # used model scan to display content scanResult
+        scan_model = ScanResult(
+            is_matched= scan_result["is_matched"],
+            matched_rules= scan_result["matched_rules"],
+            details= scan_result["details"]
+        )
+        # used model analysis result 
+        analysis_result = AnalysisResult(
+            file_info= self.file_loader.get_file_info(),
+            strings=strings,
+            scored_strings= scored_strings,
+            rule = rule_model,
+            scan_result=scan_model
+        )
+
 
         #Return final result
-        return{
-            "success":True,
-            "file_info":self.file_loader.get_file_info(),
-            "strings":strings,
-            "scored_strings":scored_strings,
-            "rule": rule,
-            "scan_result":scan_result
-        }
+        return analysis_result
         
