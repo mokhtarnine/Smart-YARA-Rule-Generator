@@ -8,6 +8,9 @@ from models.rule import Rule
 from models.scan_result import ScanResult
 from models.analysis import AnalysisResult
 
+from database.db import Database
+
+
 
 class Controller:
     """
@@ -20,6 +23,7 @@ class Controller:
         self.filter_engine = FilterEngine(min_length=3)
         self.rule_generator = RuleGenerator()
         self.yara_scanner = YaraScanner()
+        self.database = Database()
 
     def analyze_file(self, file_path: str) :
         # load file
@@ -66,7 +70,7 @@ class Controller:
             rule = rule_model,
             scan_result=scan_model
         )
-
+        self.database.save_analysis(analysis_result)
 
         #Return final result
         return analysis_result
