@@ -74,4 +74,48 @@ class Controller:
 
         #Return final result
         return analysis_result
+    
+    def generate_and_save_rule(self, source_file_path:str,rule_name: str):
+        """
+        Generate YARA rule from source file and save it in database.
+        """
+        # load source file 
+        data = self.file_loader.load_file(source_file_path)
+
+        # get source file info
+        source_file_info = self.file_loader.get_file_info()
+
+        # Extract strings
+        strings = self.string_extractor.extract_all_strings(data)
+
+        #filter suspicious strings
+        scored_strings = self.filter_engine.filter_strings(strings)
+
+        # Generate rule using custom rule name
+        rule_generator = RuleGenerator(rule_name=rule_name, author="mokhtar")
+        rule_content = rule_generator.generate_rule(scored_strings)
+
+        #validate generated rule
+        is_valid = self.yara_scanner.validate_rule(rule_content)
+
+        if not is_valid:
+            return{
+                "success": False,
+                "message": "Generated YARA rule is invalid",
+                "rule": rule_content
+            }
+        
+        # create Rule model
+        rule_model = Rule(
+            name = rule_name,
+            content = rule_content,
+            author="mokhtar",
+            description = "Generated from source file"
+        )
+
+        # save rule in database
+        self.database.save_rule(rule_model, source_file_info)
+
+        # return save rule
+        return rule_model
         
