@@ -1,3 +1,4 @@
+import os
 from core.file_loader import FileLoader
 from core.string_extractor import StringExtractor
 from core.filter_engine import FilterEngine
@@ -153,5 +154,13 @@ class Controller:
             matched_rules = raw_scan_result["matched_rules"],
             details = raw_scan_result["details"]
         )
+
+        target_file_info = {
+            "file_name": os.path.basename(target_file_path),
+            "file_path": target_file_path,
+            "file_size": os.path.getsize(target_file_path)
+        }
+
+        self.database.save_scan_result(saved_rule, target_file_info, scan_model)
 
         return scan_model

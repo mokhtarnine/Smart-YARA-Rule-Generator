@@ -48,7 +48,22 @@ class Database:
                        source_file_size INTEGER,
                        created_at TEXT
                        )
+            """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS scan_history (
+                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       rule_id INTEGER,
+                       rule_name TEXT,
+                       target_file_name TEXT,
+                       target_file_path TEXT,
+                       target_file_size TEXT,
+                       is_matched INTEGER,
+                       matched_rules TEXT,
+                       details TEXT,
+                       scanned_at TEXT
+                       )
         """)
+
         conn.commit()
         conn.close()
 
@@ -247,6 +262,86 @@ class Database:
                 "analyzed_at":row[8]
             })
         return history
+    
+    def save_scan_result(self, saved_rule:dict, target_file_info: dict, scan_result):
+        """
+        Save result of scanning a target file with a saved rule.
+        """
+        scan_data = scan_result.to_dict()
+
+        conn = self.connect()
+        cursor = conn.cursor()
+
+        cursor.exexute("""
+            INSERT INTO scan_history (
+                       rule_id,
+                       rule_name,
+                       target_file_name,
+                       target_file_path,
+                       target_file_size,
+                       is_matched,
+                       matched_rules,
+                       details,
+                       scanned_at
+                       )
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,(
+            saved_rule.get("id"),
+            saved_rule.get("name"),
+            target_file_info.get("file_name"),
+            target_file_info.get("file_path"),
+            target_file_info.get("file_size"),
+            1 if scan_result.is_matched else 0,
+            json.dumps(scan_data.get("matched_rules",[])),
+            scan_data.get("details"),
+            scan_data.get("scanned_at")
+        ))
+        conn.commit()
+        conn.close()
+
+    def get_scan_history(self):
+        """
+        Return saved scan history
+        """  
+        conn = self.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT
+            id,
+            rule_id,
+            rule_name,
+            target_file_name,
+            target_file_path,
+            target_file_size,
+            is_matched,
+            matched_rules,
+            details,
+            scanned_at
+        FROM scan_history
+        ORDER BY id DESC
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+
+        history = []
+
+        for row in rows:
+            history.append({
+                "id": row[0],
+                "rule_id": row[1],
+                "rule_name": row[2],
+                "target_file_name": row[3],
+                "target_file_path": row[4],
+                "target_file_size": row[5],
+                "is_matched": bool(row[6]),
+                "matched_rules": json.loads(row[7]) if row[7] else [],
+                "details": row[8],
+                "scanned_at": row[9]
+            })
+
+        return history
+
 
 
 
