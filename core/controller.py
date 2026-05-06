@@ -119,3 +119,39 @@ class Controller:
         # return save rule
         return rule_model
         
+    def scan_file_with_saved_rule(self, target_file_path:str, rule_id:int):
+        """
+        Scan target file suing a saved YARA rule from database.
+        """
+        # load saved rule from database
+        saved_rule = self.database.get_rule_by_id(rule_id)
+
+        if saved_rule is None:
+            return{
+                "success": False,
+                "message": "Rule not found"
+            }
+        
+        rule_content = saved_rule["content"]
+
+        # validate rule before scanning 
+        is_valid = self.yara_scanner.validate_rule(rule_content)
+
+        if not is_valid:
+            return{
+                "success": False,
+                "message": "Saved YARA rule is invalid",
+                "rule": rule_content
+            }
+        
+        # scan target file
+        raw_scan_result = self.yara_scanner.scan(target_file_path, rule_content)
+
+        # convert dictionnary to ScanResult model
+        scan_model = ScanResult(
+            is_matched = raw_scan_result["is_matched"],
+            matched_rules = raw_scan_result["matched_rules"],
+            details = raw_scan_result["details"]
+        )
+
+        return scan_model
