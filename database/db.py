@@ -35,9 +35,136 @@ class Database:
                        details TEXT,
                        analyzed_at TEXT
                        )
+            """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rules (
+                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       name TEXT NOT NULL,
+                       content TEXT NOT NULL,
+                       author TEXT,
+                       description TEXT,
+                       source_file_name TEXT,
+                       source_file_path TEXT,
+                       source_file_size INTEGER,
+                       created_at TEXT
+                       )
         """)
         conn.commit()
         conn.close()
+
+    def save_rule(self, rule, source_file_info:dict):
+        """
+        Save generated YARA rule to database.
+        """
+        rule_data = rule.to_dict()
+
+        conn = self.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO rules (
+                       name,
+                       content,
+                       author,
+                       description,
+                       source_file_name,
+                       source_file_path,
+                       source_file_size,
+                       created_at
+                       )
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,(
+        rule_data.get("name"),
+        rule_data.get("content"),
+        rule_data.get("author"),
+        rule_data.get("description"),
+        source_file_info.get("file_name"),
+        source_file_info.get("file_path"),
+        source_file_info.get("file_size"),
+        rule_data.get("created_at")   
+         ))
+        conn.commit()
+        conn.close()
+
+    def get_rules(self):
+        """
+        Return all saved YARA rules.
+        """
+        conn = self.connect()
+        cursor = conn.cursor()
+
+        cursor.execute( """
+            SELECT
+                       id,
+                       name,
+                       author,
+                       description,
+                       source_file_name,
+                       source_file_path,
+                       source_file_size,
+                       created_at
+                    FROM rules
+                    ORDER BY id DESC
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        rules = []
+
+        for row in rows:
+            rules.append({
+                "id": row[0],
+                "name": row[1],
+                "author": row[2],
+                "description": row[3],
+                "source_file_name": row[4],
+                "source_file_path": row[5],
+                "source_file_size": row[6],
+                "created_at": row[7]
+            })
+
+        return rules
+    def get_rule_by_id(self, rule_id:int):
+        """
+        Return one saved rule by id, including full rule content.
+        """
+        conn= self.connect()
+        Cursor = conn.cursor()
+
+        Cursor.execute("""
+            SELECT 
+                       id,
+                       name,
+                       content,
+                       author,
+                       description,
+                       source_file_name,
+                       source_file_path,
+                       source_file_size,
+                       created_at
+            FROM rules
+            WHERE id = ?
+        """, (rule_id,))
+
+        row = Cursor.fetchone()
+        conn.close()
+
+        if row is None:
+            return None
+
+        return {
+            "id": row[0],
+            "name": row[1],
+            "content": row[2],
+            "author": row[3],
+            "description": row[4],
+            "source_file_name": row[5],
+            "source_file_path": row[6],
+            "source_file_size": row[7],
+            "created_at": row[8]
+        }
+
 
     def save_analysis(self, analysis_result):
         """
