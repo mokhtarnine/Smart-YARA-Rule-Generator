@@ -75,6 +75,17 @@ class Controller:
 
         #Return final result
         return analysis_result
+    def get_saved_rules(self):
+        """
+        Return all saved YARA rules from database.
+        """
+        return self.database.get_rules()
+    
+    def get_scan_history(self):
+        """
+        Return all scan history from databse
+        """
+        return self.database.get_scan_history()
     
     def generate_and_save_rule(self, source_file_path:str,rule_name: str):
         """

@@ -272,7 +272,7 @@ class Database:
         conn = self.connect()
         cursor = conn.cursor()
 
-        cursor.exexute("""
+        cursor.execute("""
             INSERT INTO scan_history (
                        rule_id,
                        rule_name,
