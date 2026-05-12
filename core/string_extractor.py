@@ -41,6 +41,7 @@ class StringExtractor:
         """
         Extract strings like: h\\0t\\0t\\0p\\0 and convert to normal text.
         """
+        # the latin-1 maps every byte directly does not break bytes 
         text = data.decode("latin-1", errors="ignore")
 
         pattern = r"(?:[ -~]\\0){%d,}" % self.min_length
@@ -74,19 +75,3 @@ class StringExtractor:
 
         return sorted(final_strings)
 
-    # ******************* FILTER *************************************
-    def filter_interesting(self, strings: list) -> list:
-        """
-        Keep only suspicious / useful strings (for YARA generation).
-        """
-        keywords = [
-            "http", "cmd", "powershell", "dll", "exe",
-            "HKEY", "Software", "Run", "User-Agent"
-        ]
-
-        result = []
-        for s in strings:
-            if any(k.lower() in s.lower() for k in keywords):
-                result.append(s)
-
-        return result
