@@ -48,7 +48,7 @@ class FilterEngine:
         if "cmd.exe" in s or "powershell" in s:
             return "command"
         if "HKEY" in s:
-            return "dll"
+            return "registry"
         if s.endswith(".dll"):
             return "dll" 
         if s.endswith(".exe"):
@@ -84,7 +84,7 @@ class FilterEngine:
 #**************************** MAIN FILTER **************************
     def filter_strings(self,strings:list) -> list:
         """
-        clean , score, and sort strings.
+        clean, score, and sort strings.
         """
         #step 1 : remove noise
         cleaned = self.remove_noise(strings)

@@ -61,6 +61,7 @@ class RuleGenerator:
 
     #******************* BUILD STRINGS **************************
     def build_strings_section(self, strings):
+        """string modifiers in YARA """
         yara_strings = []
 
         for i, s in enumerate(strings):

@@ -20,8 +20,8 @@ class Controller:
     """
     def __init__(self):
         self.file_loader = FileLoader()
-        self.string_extractor = StringExtractor(min_length=3)
-        self.filter_engine = FilterEngine(min_length=3)
+        self.string_extractor = StringExtractor()
+        self.filter_engine = FilterEngine()
         self.rule_generator = RuleGenerator()
         self.yara_scanner = YaraScanner()
         self.database = Database()
