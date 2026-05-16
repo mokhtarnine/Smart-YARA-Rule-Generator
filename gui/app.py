@@ -118,6 +118,17 @@ class MainWindow(QMainWindow):
                 selection-background-color: #1f7a72;
             }
 
+            QTextEdit#rulePreview, QTextEdit#scanPreview {
+                color: #f6fbff;
+                border: 1px solid #33515a;
+                border-radius: 4px;
+                border-image: url("C:/Users/mokht/OneDrive/Desktop/PFE/yara/assets/images/code_panel_background.png") 0 0 0 0 stretch stretch;
+                padding: 10px;
+                font-family: Consolas, "Courier New", monospace;
+                font-size: 13px;
+                selection-background-color: #1f7a72;
+            }
+
             QPushButton {
                 color: #ffffff;
                 background: #176b63;
@@ -176,10 +187,19 @@ class MainWindow(QMainWindow):
         generate_button.setIcon(self._icon("generate.svg"))
         generate_button.clicked.connect(self._generate_and_save_rule)
 
+        clear_generate_button = QPushButton("New Rule")
+        clear_generate_button.setIcon(self._icon("refresh.svg"))
+        clear_generate_button.clicked.connect(self._clear_generate_rule_form)
+
+        generate_actions_layout = QHBoxLayout()
+        generate_actions_layout.addWidget(generate_button)
+        generate_actions_layout.addWidget(clear_generate_button)
+
         self.generate_status_label = QLabel("")
         self.generate_status_label.setWordWrap(True)
 
         self.generated_rule_preview = QTextEdit()
+        self.generated_rule_preview.setObjectName("rulePreview")
         self.generated_rule_preview.setReadOnly(True)
         self.generated_rule_preview.setPlaceholderText("Generated YARA rule will appear here.")
 
@@ -187,7 +207,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(source_layout)
         layout.addWidget(rule_name_label)
         layout.addWidget(self.rule_name_input)
-        layout.addWidget(generate_button)
+        layout.addLayout(generate_actions_layout)
         layout.addWidget(self.generate_status_label)
         layout.addWidget(self.generated_rule_preview, 1)
 
@@ -224,10 +244,19 @@ class MainWindow(QMainWindow):
         scan_button.setIcon(self._icon("play.svg"))
         scan_button.clicked.connect(self._scan_file_with_saved_rule)
 
+        clear_scan_button = QPushButton("New Scan")
+        clear_scan_button.setIcon(self._icon("refresh.svg"))
+        clear_scan_button.clicked.connect(self._clear_scan_file_form)
+
+        scan_actions_layout = QHBoxLayout()
+        scan_actions_layout.addWidget(scan_button)
+        scan_actions_layout.addWidget(clear_scan_button)
+
         self.scan_status_label = QLabel("")
         self.scan_status_label.setWordWrap(True)
 
         self.scan_details_preview = QTextEdit()
+        self.scan_details_preview.setObjectName("scanPreview")
         self.scan_details_preview.setReadOnly(True)
         self.scan_details_preview.setPlaceholderText("Scan details will appear here.")
 
@@ -235,7 +264,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(rule_layout)
         layout.addWidget(target_label)
         layout.addLayout(target_layout)
-        layout.addWidget(scan_button)
+        layout.addLayout(scan_actions_layout)
         layout.addWidget(self.scan_status_label)
         layout.addWidget(self.scan_details_preview, 1)
 
@@ -350,6 +379,12 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.generate_status_label.setText(f"Error: {e}")
 
+    def _clear_generate_rule_form(self):
+        self.source_file_input.clear()
+        self.rule_name_input.clear()
+        self.generate_status_label.clear()
+        self.generated_rule_preview.clear()
+
     def _load_saved_rules(self):
         self.saved_rules_combo.clear()
 
@@ -441,3 +476,8 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             self.scan_status_label.setText(f"Error: {e}")
+
+    def _clear_scan_file_form(self):
+        self.target_file_input.clear()
+        self.scan_status_label.clear()
+        self.scan_details_preview.clear()
