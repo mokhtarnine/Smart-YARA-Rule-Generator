@@ -1,10 +1,11 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QRectF
 from pathlib import Path
 
-from PySide6.QtGui import QPixmap, QPalette, QBrush, QIcon
+from PySide6.QtGui import QIcon, QPainterPath, QRegion
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -21,10 +22,12 @@ from PySide6.QtWidgets import (
 )
 
 from core.controller import Controller
+from gui.styles.app_style import build_main_stylesheet
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ICONS_DIR = PROJECT_ROOT / "assets" / "icons"
+IMAGES_DIR = PROJECT_ROOT / "assets" / "images"
 
 
 class MainWindow(QMainWindow):
@@ -39,6 +42,10 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Smart YARA Rule Generator")
         self.resize(1000, 650)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self._drag_position = None
+        self._window_radius = 24
 
         self.tabs = QTabWidget()
         self.tabs.tabBar().setExpanding(True)
@@ -47,111 +54,107 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self._scan_file_tab(), self._icon("scan.svg"), "Scan File")
         self.tabs.addTab(self._saved_rules_tab(), self._icon("rules.svg"), "Saved Rules")
         self.tabs.addTab(self._history_tab(), self._icon("history.svg"), "History")
-        self.tabs.setStyleSheet("""
-            QTabBar::tab {
-                min-width: 240px;
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-        """)
 
-        self.setCentralWidget(self.tabs)
+        self.window_frame = QWidget()
+        self.window_frame.setObjectName("windowFrame")
+
+        frame_layout = QVBoxLayout(self.window_frame)
+        frame_layout.setContentsMargins(0, 0, 0, 0)
+        frame_layout.setSpacing(0)
+        frame_layout.addWidget(self._title_bar())
+        frame_layout.addWidget(self.tabs, 1)
+
+        self.setCentralWidget(self.window_frame)
         self._apply_dark_style()
 
     def _icon(self, name: str) -> QIcon:
         return QIcon(str(ICONS_DIR / name))
 
+    def _title_bar(self) -> QWidget:
+        title_bar = QWidget()
+        title_bar.setObjectName("titleBar")
+        title_bar.setFixedHeight(46)
+        title_bar.mousePressEvent = self._start_window_drag
+        title_bar.mouseMoveEvent = self._move_window
+        title_bar.mouseReleaseEvent = self._end_window_drag
+
+        title_label = QLabel("Smart YARA Rule Generator")
+        title_label.setObjectName("titleLabel")
+        title_label.setAlignment(Qt.AlignCenter)
+
+        minimize_button = QPushButton("-")
+        minimize_button.setObjectName("windowButton")
+        minimize_button.setFixedSize(34, 30)
+        minimize_button.clicked.connect(self.showMinimized)
+
+        self.maximize_button = QPushButton("□")
+        self.maximize_button.setObjectName("windowButton")
+        self.maximize_button.setFixedSize(34, 30)
+        self.maximize_button.clicked.connect(self._toggle_window_size)
+
+        close_button = QPushButton("×")
+        close_button.setObjectName("closeButton")
+        close_button.setFixedSize(34, 30)
+        close_button.clicked.connect(self.close)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(6)
+        buttons_layout.addWidget(minimize_button)
+        buttons_layout.addWidget(self.maximize_button)
+        buttons_layout.addWidget(close_button)
+
+        layout = QGridLayout(title_bar)
+        layout.setContentsMargins(24, 8, 18, 8)
+        layout.setColumnStretch(0, 1)
+        layout.setColumnStretch(1, 1)
+        layout.setColumnStretch(2, 1)
+        layout.addWidget(title_label, 0, 0, 1, 3)
+        layout.addLayout(buttons_layout, 0, 2, Qt.AlignRight)
+
+        return title_bar
+
+    def _start_window_drag(self, event):
+        if event.button() == Qt.LeftButton:
+            self._drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def _move_window(self, event):
+        if self._drag_position is not None and event.buttons() & Qt.LeftButton:
+            self.move(event.globalPosition().toPoint() - self._drag_position)
+            event.accept()
+
+    def _end_window_drag(self, event):
+        self._drag_position = None
+        event.accept()
+
+    def _toggle_window_size(self):
+        if self.isMaximized():
+            self.showNormal()
+            self.maximize_button.setText("□")
+        else:
+            self.showMaximized()
+            self.maximize_button.setText("❐")
+        self._apply_window_mask()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._apply_window_mask()
+
+    def _apply_window_mask(self):
+        if self.isMaximized():
+            self.clearMask()
+            return
+
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), self._window_radius, self._window_radius)
+        self.setMask(QRegion(path.toFillPolygon().toPolygon()))
+
     def _apply_dark_style(self):
-        background_path = "C:/Users/mokht/OneDrive/Desktop/PFE/yara/assets/images/Intro.jfif"
-        pixmap = QPixmap(background_path)
+        background_path = str(IMAGES_DIR / "Intro.jfif").replace("\\", "/")
+        panel_background_path = str(IMAGES_DIR / "code_panel_background.png").replace("\\", "/")
 
-        if not pixmap.isNull():
-            palette = QPalette()
-            palette.setBrush(QPalette.Window, QBrush(pixmap))
-            self.setPalette(palette)
-            self.setAutoFillBackground(True)
-
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #050608;
-            }
-
-            QTabWidget {
-                border-image: url("C:/Users/mokht/OneDrive/Desktop/PFE/yara/assets/images/Intro.jfif") 0 0 0 0 stretch stretch;
-            }
-
-            QTabWidget::pane {
-                border: 1px solid #26323a;
-                background: rgba(5, 8, 10, 210);
-            }
-
-            QTabBar::tab {
-                min-width: 240px;
-                padding: 10px 16px;
-                font-size: 13px;
-                color: #c7d5df;
-                background: #111820;
-                border: 1px solid #26323a;
-            }
-
-            QTabBar::tab:selected {
-                color: #ffffff;
-                background: #19323a;
-                border-bottom: 2px solid #38c7b7;
-            }
-
-            QWidget {
-                color: #e8eef2;
-                font-size: 13px;
-            }
-
-            QLabel {
-                color: #e8eef2;
-            }
-
-            QLineEdit, QTextEdit, QComboBox, QTableWidget {
-                color: #f2f7fa;
-                background: rgba(10, 15, 19, 230);
-                border: 1px solid #30404a;
-                border-radius: 4px;
-                padding: 6px;
-                selection-background-color: #1f7a72;
-            }
-
-            QTextEdit#rulePreview, QTextEdit#scanPreview {
-                color: #f6fbff;
-                border: 1px solid #33515a;
-                border-radius: 4px;
-                border-image: url("C:/Users/mokht/OneDrive/Desktop/PFE/yara/assets/images/code_panel_background.png") 0 0 0 0 stretch stretch;
-                padding: 10px;
-                font-family: Consolas, "Courier New", monospace;
-                font-size: 13px;
-                selection-background-color: #1f7a72;
-            }
-
-            QPushButton {
-                color: #ffffff;
-                background: #176b63;
-                border: 1px solid #2aa89d;
-                border-radius: 4px;
-                padding: 8px 14px;
-            }
-
-            QPushButton:hover {
-                background: #1e8178;
-            }
-
-            QPushButton:pressed {
-                background: #11524d;
-            }
-
-            QHeaderView::section {
-                color: #ffffff;
-                background: #14232b;
-                border: 1px solid #30404a;
-                padding: 6px;
-            }
-        """)
+        self.setStyleSheet(build_main_stylesheet(background_path, panel_background_path))
 
     def _placeholder_tab(self, text: str) -> QWidget:
         tab = QWidget()
