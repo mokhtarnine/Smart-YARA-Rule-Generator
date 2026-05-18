@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QRectF
 from pathlib import Path
 
 from PySide6.QtGui import QIcon, QPainterPath, QRegion
@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
     QGridLayout,
+    QGraphicsOpacityEffect,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -13,6 +14,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QHeaderView,
+    QStackedWidget,
     QTabWidget,
     QTableWidget,
     QTableWidgetItem,
@@ -46,6 +48,7 @@ class MainWindow(QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self._drag_position = None
         self._window_radius = 24
+        self.author_name = "mokhtar"
 
         self.tabs = QTabWidget()
         self.tabs.tabBar().setExpanding(True)
@@ -58,11 +61,15 @@ class MainWindow(QMainWindow):
         self.window_frame = QWidget()
         self.window_frame.setObjectName("windowFrame")
 
+        self.pages = QStackedWidget()
+        self.pages.addWidget(self._splash_screen())
+        self.pages.addWidget(self.tabs)
+
         frame_layout = QVBoxLayout(self.window_frame)
         frame_layout.setContentsMargins(0, 0, 0, 0)
         frame_layout.setSpacing(0)
         frame_layout.addWidget(self._title_bar())
-        frame_layout.addWidget(self.tabs, 1)
+        frame_layout.addWidget(self.pages, 1)
 
         self.setCentralWidget(self.window_frame)
         self._apply_dark_style()
@@ -155,6 +162,77 @@ class MainWindow(QMainWindow):
         panel_background_path = str(IMAGES_DIR / "code_panel_background.png").replace("\\", "/")
 
         self.setStyleSheet(build_main_stylesheet(background_path, panel_background_path))
+
+    def _splash_screen(self) -> QWidget:
+        splash = QWidget()
+        splash.setObjectName("splashScreen")
+
+        layout = QVBoxLayout(splash)
+        layout.setContentsMargins(90, 70, 90, 70)
+        layout.setSpacing(18)
+
+        layout.addStretch()
+
+        app_name = QLabel("Smart YARA\nRule Generator")
+        app_name.setObjectName("splashTitle")
+        app_name.setAlignment(Qt.AlignCenter)
+
+        title_effect = QGraphicsOpacityEffect(app_name)
+        app_name.setGraphicsEffect(title_effect)
+        self.splash_animation = QPropertyAnimation(title_effect, b"opacity")
+        self.splash_animation.setDuration(2200)
+        self.splash_animation.setLoopCount(-1)
+        self.splash_animation.setStartValue(0.62)
+        self.splash_animation.setKeyValueAt(0.5, 1.0)
+        self.splash_animation.setEndValue(0.62)
+        self.splash_animation.setEasingCurve(QEasingCurve.InOutSine)
+        self.splash_animation.start()
+
+        subtitle = QLabel("Generate, save, and test YARA rules from suspicious files")
+        subtitle.setObjectName("splashSubtitle")
+        subtitle.setAlignment(Qt.AlignCenter)
+
+        author_label = QLabel("Author name")
+        author_label.setObjectName("splashInputLabel")
+        author_label.setAlignment(Qt.AlignCenter)
+
+        self.author_input = QLineEdit()
+        self.author_input.setObjectName("authorInput")
+        self.author_input.setPlaceholderText("Enter author name")
+        self.author_input.setText(self.author_name)
+        self.author_input.setAlignment(Qt.AlignCenter)
+        self.author_input.setFixedWidth(360)
+        self.author_input.returnPressed.connect(self._start_app)
+
+        start_button = QPushButton("Start")
+        start_button.setObjectName("startButton")
+        start_button.setFixedWidth(180)
+        start_button.clicked.connect(self._start_app)
+
+        start_layout = QHBoxLayout()
+        start_layout.addStretch()
+        start_layout.addWidget(start_button)
+        start_layout.addStretch()
+
+        layout.addWidget(app_name)
+        layout.addWidget(subtitle)
+        layout.addSpacing(28)
+        layout.addWidget(author_label)
+        layout.addWidget(self.author_input, 0, Qt.AlignCenter)
+        layout.addLayout(start_layout)
+        layout.addStretch()
+
+        return splash
+
+    def _start_app(self):
+        author = self.author_input.text().strip()
+
+        if not author:
+            QMessageBox.warning(self, "Missing author", "Please enter the author name.")
+            return
+
+        self.author_name = author
+        self.pages.setCurrentWidget(self.tabs)
 
     def _placeholder_tab(self, text: str) -> QWidget:
         tab = QWidget()
@@ -369,7 +447,7 @@ class MainWindow(QMainWindow):
             return
 
         try:
-            result = self.controller.generate_and_save_rule(source_file, rule_name)
+            result = self.controller.generate_and_save_rule(source_file, rule_name, self.author_name)
 
             if isinstance(result, dict) and result.get("success") is False:
                 self.generate_status_label.setText(f"Error: {result['message']}")

@@ -25,6 +25,67 @@ def build_main_stylesheet(app_background_path: str, panel_background_path: str) 
             font-weight: 600;
         }
 
+        QWidget#splashScreen {
+            border-image: url("__APP_BACKGROUND__") 0 0 0 0 stretch stretch;
+            background-color: rgba(5, 8, 10, 235);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+        }
+
+        QLabel#splashTitle {
+            color: #ffffff;
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        QLabel#splashSubtitle {
+            color: #bfd2dc;
+            font-size: 15px;
+        }
+
+        QLabel#splashInputLabel {
+            color: #e8eef2;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        QLineEdit#authorInput {
+            max-width: 360px;
+            min-height: 36px;
+            color: #ffffff;
+            background: rgba(7, 16, 18, 230);
+            border: 1px solid #38535b;
+            border-radius: 18px;
+            padding: 6px 16px;
+            selection-background-color: #1f7a72;
+        }
+
+        QLineEdit#authorInput:hover,
+        QLineEdit#authorInput:focus {
+            border-color: #38c7b7;
+        }
+
+        QPushButton#startButton {
+            min-height: 42px;
+            color: #051112;
+            background: #38c7b7;
+            border: 1px solid #6be0d5;
+            border-radius: 21px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        QPushButton#startButton:hover {
+            background: #61ddd2;
+            border-color: #8af0e8;
+        }
+
+        QPushButton#startButton:pressed {
+            background: #249488;
+            border-color: #38c7b7;
+        }
+
         QTabWidget {
             border-image: url("__APP_BACKGROUND__") 0 0 0 0 stretch stretch;
             border-radius: 0;

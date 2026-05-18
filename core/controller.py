@@ -87,7 +87,7 @@ class Controller:
         """
         return self.database.get_scan_history()
     
-    def generate_and_save_rule(self, source_file_path:str,rule_name: str):
+    def generate_and_save_rule(self, source_file_path:str, rule_name: str, author: str = "mokhtar"):
         """
         Generate YARA rule from source file and save it in database.
         """
@@ -104,7 +104,7 @@ class Controller:
         scored_strings = self.filter_engine.filter_strings(strings)
 
         # Generate rule using custom rule name
-        rule_generator = RuleGenerator(rule_name=rule_name, author="mokhtar")
+        rule_generator = RuleGenerator(rule_name=rule_name, author=author)
         rule_content = rule_generator.generate_rule(scored_strings)
 
         #validate generated rule
@@ -121,7 +121,7 @@ class Controller:
         rule_model = Rule(
             name = rule_name,
             content = rule_content,
-            author="mokhtar",
+            author=author,
             description = "Generated from source file"
         )
 
