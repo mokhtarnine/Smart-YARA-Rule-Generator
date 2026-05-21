@@ -19,27 +19,21 @@ class RuleGenerator:
         return s.replace("\\", "\\\\").replace('"', '\\"')
 
     # ***************** SELECT STRINGS ****************************
-    def select_strings(self, scored_strings, max_strings=8):
+    def select_strings(self, scored_strings, max_strings=20):
         selected = []
-        seen_types = set()
 
         for s, score in scored_strings:
             if score < 3:
                 continue
 
-            t = self.detect_type(s)
-
-            # ensure diversity
-            if t not in seen_types or len(selected) < 4:
-                selected.append(s)
-                seen_types.add(t)
+            selected.append(s)
 
             if len(selected) >= max_strings:
                 break
 
         # fallback
         if len(selected) < 3:
-            selected = [s for s, _ in scored_strings[:5]]
+            selected = [s for s, _ in scored_strings[:10]]
 
         return selected
 
