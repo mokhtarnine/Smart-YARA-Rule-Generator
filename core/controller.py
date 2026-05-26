@@ -132,7 +132,7 @@ class Controller:
         )
 
         # save rule in database
-        self.database.save_rule(rule_model, source_file_info)
+        self.database.save_rule(rule_model, source_file_info, behaviors)
 
         # return save rule
         return {

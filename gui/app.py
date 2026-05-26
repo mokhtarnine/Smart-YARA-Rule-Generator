@@ -264,16 +264,16 @@ class MainWindow(QMainWindow):
         self.rule_name_input = QLineEdit()
         self.rule_name_input.setPlaceholderText("Example: MySavedRule")
 
-        generate_button = QPushButton("Generate and Save")
-        generate_button.setIcon(self._icon("generate.svg"))
-        generate_button.clicked.connect(self._generate_and_save_rule)
+        self.generate_button = QPushButton("Generate and Save")
+        self.generate_button.setIcon(self._icon("generate.svg"))
+        self.generate_button.clicked.connect(self._generate_and_save_rule)
 
         clear_generate_button = QPushButton("New Rule")
         clear_generate_button.setIcon(self._icon("refresh.svg"))
         clear_generate_button.clicked.connect(self._clear_generate_rule_form)
 
         generate_actions_layout = QHBoxLayout()
-        generate_actions_layout.addWidget(generate_button)
+        generate_actions_layout.addWidget(self.generate_button)
         generate_actions_layout.addWidget(clear_generate_button)
 
         self.generate_status_label = QLabel("")
@@ -331,16 +331,16 @@ class MainWindow(QMainWindow):
         target_layout.addWidget(self.target_file_input)
         target_layout.addWidget(browse_button)
 
-        scan_button = QPushButton("Scan File")
-        scan_button.setIcon(self._icon("play.svg"))
-        scan_button.clicked.connect(self._scan_file_with_saved_rule)
+        self.scan_button = QPushButton("Scan File")
+        self.scan_button.setIcon(self._icon("play.svg"))
+        self.scan_button.clicked.connect(self._scan_file_with_saved_rule)
 
         clear_scan_button = QPushButton("New Scan")
         clear_scan_button.setIcon(self._icon("refresh.svg"))
         clear_scan_button.clicked.connect(self._clear_scan_file_form)
 
         scan_actions_layout = QHBoxLayout()
-        scan_actions_layout.addWidget(scan_button)
+        scan_actions_layout.addWidget(self.scan_button)
         scan_actions_layout.addWidget(clear_scan_button)
 
         self.scan_status_label = QLabel("")
@@ -373,12 +373,13 @@ class MainWindow(QMainWindow):
         refresh_button.setFixedWidth(200)
 
         self.saved_rules_table = QTableWidget()
-        self.saved_rules_table.setColumnCount(5)
+        self.saved_rules_table.setColumnCount(6)
         self.saved_rules_table.setHorizontalHeaderLabels([
             "ID",
             "Name",
             "Author",
             "Source File",
+            "Behaviors",
             "Created At",
         ])
         self.saved_rules_table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -406,13 +407,14 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(tab)
 
         self.history_table = QTableWidget()
-        self.history_table.setColumnCount(6)
+        self.history_table.setColumnCount(7)
         self.history_table.setHorizontalHeaderLabels([
             "ID",
             "Rule",
             "Target File",
             "Matched",
             "Matched Rules",
+            "Rule Behaviors",
             "Scanned At",
         ])
         self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -457,6 +459,7 @@ class MainWindow(QMainWindow):
             return
 
         try:
+            self.generate_button.setEnabled(False)
             result = self.controller.generate_and_save_rule(source_file, rule_name, self.author_name)
 
             if isinstance(result, dict) and result.get("success") is False:
@@ -478,6 +481,8 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             self.generate_status_label.setText(f"Error: {e}")
+        finally:
+            self.generate_button.setEnabled(True)
 
     def _clear_generate_rule_form(self):
         self.source_file_input.clear()
@@ -515,6 +520,20 @@ class MainWindow(QMainWindow):
 
         return getattr(behavior, key, None)
 
+    def _behavior_summary(self, behaviors: list) -> str:
+        if not behaviors:
+            return "None"
+
+        names = []
+
+        for behavior in behaviors:
+            name = self._behavior_value(behavior, "name")
+
+            if name and name not in names:
+                names.append(name)
+
+        return ", ".join(names) if names else "None"
+
     def _load_saved_rules(self):
         self.saved_rules_combo.clear()
 
@@ -535,6 +554,9 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Error loading rules", str(e))
             return
 
+        rules = self._unique_records_by_id(rules)
+        self.saved_rules_table.clearContents()
+        self.saved_rules_table.setRowCount(0)
         self.saved_rules_table.setRowCount(len(rules))
 
         for row, rule in enumerate(rules):
@@ -543,6 +565,7 @@ class MainWindow(QMainWindow):
                 rule.get("name"),
                 rule.get("author"),
                 rule.get("source_file_name"),
+                self._behavior_summary(rule.get("behaviors", [])),
                 rule.get("created_at"),
             ]
 
@@ -556,6 +579,9 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Error loading history", str(e))
             return
 
+        history = self._unique_records_by_id(history)
+        self.history_table.clearContents()
+        self.history_table.setRowCount(0)
         self.history_table.setRowCount(len(history))
 
         for row, item in enumerate(history):
@@ -565,11 +591,27 @@ class MainWindow(QMainWindow):
                 item.get("target_file_name"),
                 "Yes" if item.get("is_matched") else "No",
                 ", ".join(item.get("matched_rules", [])),
+                self._behavior_summary(item.get("behaviors", [])),
                 item.get("scanned_at"),
             ]
 
             for column, value in enumerate(values):
                 self.history_table.setItem(row, column, QTableWidgetItem(str(value)))
+
+    def _unique_records_by_id(self, records: list) -> list:
+        unique_records = []
+        seen_ids = set()
+
+        for record in records:
+            record_id = record.get("id")
+
+            if record_id in seen_ids:
+                continue
+
+            seen_ids.add(record_id)
+            unique_records.append(record)
+
+        return unique_records
 
 
     def _choose_target_file(self):
@@ -590,6 +632,7 @@ class MainWindow(QMainWindow):
         rule_id = self.saved_rules_combo.currentData()
 
         try:
+            self.scan_button.setEnabled(False)
             result = self.controller.scan_file_with_saved_rule(target_file, rule_id)
 
             if isinstance(result, dict) and result.get("success") is False:
@@ -606,6 +649,8 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             self.scan_status_label.setText(f"Error: {e}")
+        finally:
+            self.scan_button.setEnabled(True)
 
     def _clear_scan_file_form(self):
         self.target_file_input.clear()

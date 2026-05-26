@@ -7,7 +7,7 @@ class BehaviorTagger:
     def __init__(self):
         self.behavior_rules = [
             {
-                "name": "Presistence",
+                "name": "Persistence",
                 "reason": "Registry Run key or startup indicator found",
                 "severity" : "High",
                 "keywords": [
@@ -138,7 +138,7 @@ class BehaviorTagger:
                     indicators.append(string_value)
                     break
 
-            return self._unique(indicators)
+        return self._unique(indicators)
         
 
     def _get_string_value(self, item) -> str:
