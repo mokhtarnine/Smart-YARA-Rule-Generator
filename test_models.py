@@ -1,16 +1,16 @@
-from models.behavior import BehaviorTag
+from core.behavior_tagger import BehaviorTagger
 
-behavior = BehaviorTag(
-    name="Persistence",
-    reason="Registry Run key or startup indicator found",
-    severity="High",
-    indicators=[
-        "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    ]
-)
+tagger = BehaviorTagger()
 
-print(behavior.summary())
-print("*" * 10)
-print(behavior.to_dict())
-print("*" * 10)
-print(behavior.has_indicators())
+scored_strings = [
+    ("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", 15),
+    ("http://badsite.com/payload.exe", 20),
+    ("cmd.exe /c whoami", 12),
+    ("VirtualAlloc", 10),
+]
+
+behaviors = tagger.detect(scored_strings)
+
+for behavior in behaviors:
+    print(behavior.summary())
+    print(behavior.to_dict())

@@ -1,4 +1,5 @@
 import os
+from core.behavior_tagger import BehaviorTagger
 from core.file_loader import FileLoader
 from core.string_extractor import StringExtractor
 from core.filter_engine import FilterEngine
@@ -25,6 +26,7 @@ class Controller:
         self.rule_generator = RuleGenerator()
         self.yara_scanner = YaraScanner()
         self.database = Database()
+        self.behavior_tagger = BehaviorTagger()
 
     def analyze_file(self, file_path: str) :
         # load file
@@ -103,6 +105,9 @@ class Controller:
         #filter suspicious strings
         scored_strings = self.filter_engine.filter_strings(strings)
 
+        #detect malware behaviors
+        behaviors = self.behavior_tagger.detect(scored_strings)
+
         # Generate rule using custom rule name
         rule_generator = RuleGenerator(rule_name=rule_name, author=author)
         rule_content = rule_generator.generate_rule(scored_strings)
@@ -114,7 +119,8 @@ class Controller:
             return{
                 "success": False,
                 "message": "Generated YARA rule is invalid",
-                "rule": rule_content
+                "rule": rule_content,
+                "behaviors": behaviors
             }
         
         # create Rule model
@@ -129,7 +135,10 @@ class Controller:
         self.database.save_rule(rule_model, source_file_info)
 
         # return save rule
-        return rule_model
+        return {
+            "rule": rule_model,
+            "behaviors": behaviors
+        }
         
     def scan_file_with_saved_rule(self, target_file_path:str, rule_id:int):
         """

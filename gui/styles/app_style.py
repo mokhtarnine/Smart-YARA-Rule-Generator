@@ -128,6 +128,13 @@ def build_main_stylesheet(app_background_path: str, panel_background_path: str) 
             color: #e8eef2;
         }
 
+        QLabel#behaviorLabel {
+            color: #9ee8df;
+            font-size: 13px;
+            font-weight: 700;
+            padding-top: 4px;
+        }
+
         QLineEdit, QTextEdit, QComboBox, QTableWidget {
             color: #f2f7fa;
             background: rgba(10, 15, 19, 230);
@@ -207,6 +214,21 @@ def build_main_stylesheet(app_background_path: str, panel_background_path: str) 
             font-family: Consolas, "Courier New", monospace;
             font-size: 13px;
             selection-background-color: #1f7a72;
+        }
+
+        QTextEdit#behaviorPreview {
+            color: #eaf7f5;
+            background: rgba(5, 14, 16, 225);
+            border: 1px solid rgba(56, 199, 183, 120);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 12px;
+            selection-background-color: #1f7a72;
+        }
+
+        QTextEdit#behaviorPreview:hover {
+            border-color: #49d6ca;
         }
 
         QPushButton {

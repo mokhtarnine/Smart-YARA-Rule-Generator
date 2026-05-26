@@ -1,3 +1,5 @@
+from models.behavior import BehaviorTag
+
 class BehaviorTagger:
     """
     Detect malware Behavior categories from extract/scored strings.
@@ -110,12 +112,14 @@ class BehaviorTagger:
             indicators = self._find_indicators(scored_strings, rule["keywords"])
 
             if indicators:
-                behaviors.append({
-                    "name": rule["name"],
-                    "reason": rule["reason"],
-                    "severity": rule["severity"],
-                    "indicators": indicators
-                })
+                behaviors.append(
+                    BehaviorTag(
+                        name = rule["name"],
+                        reason= rule["reason"],
+                        severity= rule["severity"],
+                        indicators=indicators
+                    )
+                )
         return behaviors
     
     def _find_indicators(self, scored_strings: list, keywords: list) -> list:

@@ -284,13 +284,23 @@ class MainWindow(QMainWindow):
         self.generated_rule_preview.setReadOnly(True)
         self.generated_rule_preview.setPlaceholderText("Generated YARA rule will appear here.")
 
+        behavior_label = QLabel("Detected behaviors")
+        behavior_label.setObjectName("behaviorLabel")
+
+        self.behavior_preview = QTextEdit()
+        self.behavior_preview.setObjectName("behaviorPreview")
+        self.behavior_preview.setReadOnly(True)
+        self.behavior_preview.setPlaceholderText("Detected malware behaviors will appear here.")
+
         layout.addWidget(source_label)
         layout.addLayout(source_layout)
         layout.addWidget(rule_name_label)
         layout.addWidget(self.rule_name_input)
         layout.addLayout(generate_actions_layout)
         layout.addWidget(self.generate_status_label)
-        layout.addWidget(self.generated_rule_preview, 1)
+        layout.addWidget(self.generated_rule_preview, 2)
+        layout.addWidget(behavior_label)
+        layout.addWidget(self.behavior_preview, 1)
 
         return tab
 
@@ -452,10 +462,19 @@ class MainWindow(QMainWindow):
             if isinstance(result, dict) and result.get("success") is False:
                 self.generate_status_label.setText(f"Error: {result['message']}")
                 self.generated_rule_preview.setPlainText(result.get("rule", ""))
+                self.behavior_preview.setPlainText(self._format_behaviors(result.get("behaviors", [])))
                 return
 
-            self.generate_status_label.setText(f"Rule saved: {result.name}")
-            self.generated_rule_preview.setPlainText(result.content)
+            if isinstance(result, dict):
+                rule = result["rule"]
+                behaviors = result.get("behaviors", [])
+            else:
+                rule = result
+                behaviors = []
+
+            self.generate_status_label.setText(f"Rule saved: {rule.name}")
+            self.generated_rule_preview.setPlainText(rule.content)
+            self.behavior_preview.setPlainText(self._format_behaviors(behaviors))
 
         except Exception as e:
             self.generate_status_label.setText(f"Error: {e}")
@@ -465,6 +484,36 @@ class MainWindow(QMainWindow):
         self.rule_name_input.clear()
         self.generate_status_label.clear()
         self.generated_rule_preview.clear()
+        self.behavior_preview.clear()
+
+    def _format_behaviors(self, behaviors: list) -> str:
+        if not behaviors:
+            return "No behavior tags detected."
+
+        lines = []
+
+        for behavior in behaviors:
+            name = self._behavior_value(behavior, "name")
+            severity = self._behavior_value(behavior, "severity")
+            reason = self._behavior_value(behavior, "reason")
+            indicators = self._behavior_value(behavior, "indicators") or []
+
+            lines.append(f"{name} ({severity})")
+            lines.append(f"Reason: {reason}")
+            lines.append("Indicators:")
+
+            for indicator in indicators:
+                lines.append(f"  - {indicator}")
+
+            lines.append("")
+
+        return "\n".join(lines).strip()
+
+    def _behavior_value(self, behavior, key: str):
+        if isinstance(behavior, dict):
+            return behavior.get(key)
+
+        return getattr(behavior, key, None)
 
     def _load_saved_rules(self):
         self.saved_rules_combo.clear()
