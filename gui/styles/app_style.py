@@ -231,6 +231,74 @@ def build_main_stylesheet(app_background_path: str, panel_background_path: str) 
             border-color: #49d6ca;
         }
 
+        QScrollBar:vertical {
+            background: rgba(5, 12, 14, 220);
+            border: none;
+            width: 12px;
+            margin: 4px 3px 4px 3px;
+            border-radius: 6px;
+        }
+
+        QScrollBar::handle:vertical {
+            background: #176b63;
+            min-height: 28px;
+            border-radius: 5px;
+        }
+
+        QScrollBar::handle:vertical:hover {
+            background: #38c7b7;
+        }
+
+        QScrollBar::handle:vertical:pressed {
+            background: #11524d;
+        }
+
+        QScrollBar::add-line:vertical,
+        QScrollBar::sub-line:vertical {
+            height: 0;
+            background: transparent;
+            border: none;
+        }
+
+        QScrollBar::add-page:vertical,
+        QScrollBar::sub-page:vertical {
+            background: transparent;
+        }
+
+        QScrollBar:horizontal {
+            background: rgba(5, 12, 14, 220);
+            border: none;
+            height: 12px;
+            margin: 3px 4px 3px 4px;
+            border-radius: 6px;
+        }
+
+        QScrollBar::handle:horizontal {
+            background: #176b63;
+            min-width: 28px;
+            border-radius: 5px;
+        }
+
+        QScrollBar::handle:horizontal:hover {
+            background: #38c7b7;
+        }
+
+        QScrollBar::handle:horizontal:pressed {
+            background: #11524d;
+        }
+
+        QScrollBar::add-line:horizontal,
+        QScrollBar::sub-line:horizontal {
+            width: 0;
+            background: transparent;
+            border: none;
+        }
+
+        QScrollBar::add-page:horizontal,
+        QScrollBar::sub-page:horizontal {
+            background: transparent;
+        }
+
         QPushButton {
             color: #ffffff;
             background: #176b63;

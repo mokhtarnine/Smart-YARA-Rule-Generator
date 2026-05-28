@@ -7,6 +7,8 @@ from gui.app import MainWindow
 
 def main():
     app = QApplication(sys.argv)
+    app.setApplicationName("Smart YARA Rule Generator")
+    app.setOrganizationName("Smart YARA")
 
     window = MainWindow()
     window.show()

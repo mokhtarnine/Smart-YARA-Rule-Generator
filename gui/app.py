@@ -1,3 +1,4 @@
+import sys
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QRectF
 from pathlib import Path
 
@@ -27,9 +28,18 @@ from core.controller import Controller
 from gui.styles.app_style import build_main_stylesheet
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-ICONS_DIR = PROJECT_ROOT / "assets" / "icons"
-IMAGES_DIR = PROJECT_ROOT / "assets" / "images"
+def resource_path(relative_path: str) -> Path:
+    """
+    Return the correct path for assets in development and PyInstaller exe.
+    """
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / relative_path
+
+    return Path(__file__).resolve().parents[1] / relative_path
+
+
+ICONS_DIR = resource_path("assets/icons")
+IMAGES_DIR = resource_path("assets/images")
 
 
 class MainWindow(QMainWindow):
