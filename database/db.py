@@ -1,6 +1,8 @@
 import sqlite3
 import json
+import os
 from datetime import datetime
+from pathlib import Path
 
 
 class Database:
@@ -8,9 +10,14 @@ class Database:
     Handles saving and reading analysis results from SQLite database.
     """
 
-    def __init__(self, db_path: str = "analysis_history.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        self.db_path = db_path or self._default_db_path()
         self.create_table()
+
+    def _default_db_path(self) -> str:
+        app_data_dir = Path(os.getenv("LOCALAPPDATA", Path.home())) / "SmartYaraGenerator"
+        app_data_dir.mkdir(parents=True, exist_ok=True)
+        return str(app_data_dir / "analysis_history.db")
 
     def connect(self):
         """
