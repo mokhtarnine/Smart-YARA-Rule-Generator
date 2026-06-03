@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         self.controller = Controller()
 
         self.setWindowTitle("Smart YARA Rule Generator")
+        self.setWindowIcon(self._icon("app.ico"))
         self.resize(1000, 650)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
