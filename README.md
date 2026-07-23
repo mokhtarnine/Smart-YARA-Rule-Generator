@@ -239,6 +239,18 @@ The database stores:
 
 ## Test Checklist
 
+### Automated unit tests
+
+Install the development dependencies and run the backend test suite:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m pytest
+```
+
+The tests use temporary files and temporary SQLite databases. They do not open
+the GUI or modify the application's real history database.
+
 After changes, test these steps:
 
 1. Run `python main.py`.

@@ -33,7 +33,7 @@ class RuleGenerator:
 
         # fallback
         if len(selected) < 3:
-            selected = [s for s, _ in scored_strings[:10]]
+            selected = [s for s, _ in scored_strings[:min(10, max_strings)]]
 
         return selected
 
@@ -98,11 +98,13 @@ class RuleGenerator:
 
             date = datetime.datetime.now().strftime("%Y-%m-%d")
 
+            escaped_author = self.escape_string(self.author)
+
             rule = f"""
 rule {self.rule_name}
 {{
     meta:
-        author = "{self.author}"
+        author = "{escaped_author}"
         date = "{date}"
         description = "Auto-generated rule from Smart YARA tool"
 
