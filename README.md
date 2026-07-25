@@ -172,7 +172,7 @@ yara-python==4.5.4
 Open PowerShell in:
 
 ```powershell
-C:\Users\mokht\OneDrive\Desktop\PFE\yara
+C:\Users\***\OneDrive\Desktop\PFE\yara
 ```
 
 Create the virtual environment outside the repo:
@@ -275,7 +275,7 @@ pip install pyinstaller
 From the source folder:
 
 ```powershell
-C:\Users\mokht\OneDrive\Desktop\PFE\yara
+C:\Users\***\OneDrive\Desktop\PFE\yara
 ```
 
 Run:
@@ -287,7 +287,7 @@ pyinstaller --clean -y --onefile --windowed --name SmartYaraGenerator --icon "as
 After packaging, the portable executable is created here:
 
 ```text
-C:\Users\mokht\OneDrive\Desktop\PFE\packege\dist\SmartYaraGenerator.exe
+C:\Users\****\OneDrive\Desktop\PFE\packege\dist\SmartYaraGenerator.exe
 ```
 
 `build/` is PyInstaller temporary build work.
@@ -330,7 +330,7 @@ winget install JRSoftware.InnoSetup
 The installer project is currently outside the Git repo:
 
 ```text
-C:\Users\mokht\OneDrive\Desktop\PFE\installer_project
+C:\Users\**\OneDrive\Desktop\PFE\installer_project
 ```
 
 The Inno Setup script is:
@@ -342,19 +342,19 @@ C:\Users\mokht\OneDrive\Desktop\PFE\installer_project\SmartYaraGeneratorInstalle
 The script takes this executable:
 
 ```text
-C:\Users\mokht\OneDrive\Desktop\PFE\packege\dist\SmartYaraGenerator.exe
+C:\Users\**\OneDrive\Desktop\PFE\packege\dist\SmartYaraGenerator.exe
 ```
 
 And creates this installer:
 
 ```text
-C:\Users\mokht\OneDrive\Desktop\PFE\installer_output\SmartYaraGeneratorSetup.exe
+C:\Users\****\OneDrive\Desktop\PFE\installer_output\SmartYaraGeneratorSetup.exe
 ```
 
 To compile from PowerShell:
 
 ```powershell
-& "C:\Users\mokht\AppData\Local\Programs\Inno Setup 6\ISCC.exe" "C:\Users\mokht\OneDrive\Desktop\PFE\installer_project\SmartYaraGeneratorInstaller.iss"
+& "C:\Users******\AppData\Local\Programs\Inno Setup 6\ISCC.exe" "C:\Users\mokht\OneDrive\Desktop\PFE\installer_project\SmartYaraGeneratorInstaller.iss"
 ```
 
 The installer creates a normal Windows application installation with:
@@ -371,7 +371,7 @@ The installer creates a normal Windows application installation with:
 Push the source project:
 
 ```text
-C:\Users\mokht\OneDrive\Desktop\PFE\yara
+C:\Users\*****\OneDrive\Desktop\PFE\yara
 ```
 
 Do not push:
