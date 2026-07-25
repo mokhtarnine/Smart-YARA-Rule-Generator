@@ -172,7 +172,7 @@ yara-python==4.5.4
 Open PowerShell in:
 
 ```powershell
-C:\Users\mokht\OneDrive\Desktop\PFE\yara
+C:\Users\***\OneDrive\Desktop\PFE\yara
 ```
 
 Create the virtual environment outside the repo:
